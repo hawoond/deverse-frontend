@@ -1,0 +1,77 @@
+main {
+    min-height: calc(100vh - 8rem); /* Adjust for Navbar and Footer height */
+    width: 100%;
+  }
+  
+  form {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+  
+  textarea, div[contenteditable="true"] {
+    height: 50vh;
+  }
+  
+  .w-32 {
+    width: 8rem;
+  }
+  
+  .h-32 {
+    height: 8rem;
+  }
+  
+  .resize-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .content-input, .content-preview {
+    overflow: auto;
+  }
+  
+  button {
+    cursor: pointer;
+    color: #3d3d3d;
+  }
+  
+  button:hover {
+    background-color: #e65c50;
+  }
+  
+  button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.5);
+  }
+  
+  .text-white {
+    color: #ffffff;
+  }
+  
+  .bg-dark {
+    background-color: #1a1a1a;
+  }
+  
+  .border-gray-700 {
+    border-color: #3d3d3d;
+  }
+  
+  .text-ff6f61 {
+    color: #ff6f61;
+  }
+  
+  .bg-ff6f61 {
+    background-color: #ff6f61;
+  }
+  
+  .hover-bg-e65c50:hover {
+    background-color: #e65c50;
+  }
+  
+  .focus\:outline-none:focus {
+    outline: none;
+  }
+  
+  .focus\:ring-2:focus {
+    box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.5);
+  }

@@ -1,3 +1,52 @@
+/* src/app.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global styles for consistent layout */
+body {
+  @apply bg-black text-white;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* Styling for main layout elements */
+main {
+  @apply container mx-auto px-4 mt-4;
+  min-height: calc(100vh - 8rem); /* Adjust for Navbar and Footer height */
+}
+
+/* Navbar styling */
+nav {
+  background-color: #111; /* Darker shade for Navbar */
+  color: #f5f5f5; /* Light grey text for contrast */
+  padding: 1rem; /* Add padding for better spacing */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}
+nav a {
+  color: #f5f5f5; /* Set link color to light grey */
+  margin-right: 1rem; /* Space out navigation links */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+nav a:hover {
+  color: #ff6f61; /* Light red color for hover effect */
+}
+
+/* Footer styling */
+footer {
+  @apply bg-gray-800 text-white;
+  padding: 1.5rem;
+  text-align: center;
+}
+footer a {
+  @apply text-white hover:underline;
+  margin-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  main {
+    @apply px-8; /* Increase padding for larger screens */
+  }
+}
