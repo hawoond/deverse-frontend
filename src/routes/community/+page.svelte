@@ -38,7 +38,7 @@
   </script>
   
   <svelte:head>
-    <title>Community - DevCommunity</title>
+    <title>Community - Deverse</title>
   </svelte:head>
   
   <div class="container mx-auto px-4 py-8">

@@ -22,7 +22,7 @@
   </script>
   
   <svelte:head>
-    <title>Wiki - DevCommunity</title>
+    <title>Wiki - Deverse</title>
   </svelte:head>
   
   <div class="container mx-auto px-4 py-8">

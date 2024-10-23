@@ -1,67 +1,95 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
-  import { goto } from '$app/navigation';
-  import { auth } from '$lib/stores/auth';
-  import { api } from '$lib/utils/api';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { fetchBlogPosts, getCurrentUser } from '$lib/utils/api';
+	import { auth } from '$lib/stores/auth';
+	import type { BlogPost, User } from '$lib/types';
+  import '$styles/blog.css';
 
-  interface BlogPost {
-    id: string;
-    title: string;
-    content: string;
-    thumbnail: string;
-    author: string;
-  }
+	let posts: BlogPost[] = [];
+	let currentUser: User | null = null;
+	let isLoading = true;
+	let error: string | null = null;
+	let viewMode: 'grid' | 'list' = 'grid';
 
-  let posts: BlogPost[] = [];
-  let viewMode = writable('grid');
+	onMount(async () => {
+		try {
+			// 테스트를 위해 임시로 author 권한을 가진 사용자로 로그인
+			auth.login({
+				id: 'test-author',
+				name: 'Test Author',
+				email: 'test@example.com',
+				token: 'test-token',
+				role: 'author'
+			});
 
-  onMount(async () => {
-    try {
-      posts = await api.getBlogPosts();
-    } catch (error) {
-      console.error('Failed to fetch blog posts:', error);
-    }
-  });
+			const [fetchedPosts, user] = await Promise.all([fetchBlogPosts(), getCurrentUser()]);
+			posts = fetchedPosts;
+			currentUser = user;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'An unknown error occurred';
+		} finally {
+			isLoading = false;
+		}
+	});
 
-  function toggleViewMode() {
-    viewMode.update(mode => mode === 'grid' ? 'list' : 'grid');
-  }
+	function toggleViewMode() {
+		viewMode = viewMode === 'grid' ? 'list' : 'grid';
+	}
 
-  function createNewPost() {
-    goto('/blog/new');
-  }
+	function navigateToCreatePost() {
+		goto('/blog/new');
+	}
+
+	function navigateToPost(postId: string) {
+		goto(`/blog/${postId}`);
+	}
 </script>
 
 <svelte:head>
-  <title>Blog - DevCommunity</title>
+	<title>Deverse - Blog</title>
 </svelte:head>
 
-<div class="container mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold">Blog Posts</h1>
-    <div>
-      <button on:click={toggleViewMode} class="mr-4 px-4 py-2 bg-gray-200 rounded">
-        {$viewMode === 'grid' ? 'List View' : 'Grid View'}
-      </button>
-      {#if $auth.isAuthenticated && $auth.user?.roles.includes('author')}
-        <button on:click={createNewPost} class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Create New Post
-        </button>
-      {/if}
-    </div>
-  </div>
+<main class="container mx-auto px-4 py-8">
+	<div class="flex justify-between items-center mb-8">
+		<h1 class="text-4xl font-bold">Deverse Blog</h1>
+		<div class="space-x-4">
+			<button on:click={toggleViewMode} class="btn">
+				Switch to {viewMode === 'grid' ? 'List' : 'Grid'} View
+			</button>
+			{#if currentUser && currentUser.role === 'author'}
+				<button on:click={navigateToCreatePost} class="btn"> Create New Post </button>
+			{/if}
+		</div>
+	</div>
 
-  <div class={$viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
-    {#each posts as post}
-      <div class={$viewMode === 'grid' ? 'bg-white rounded-lg shadow-md overflow-hidden' : 'bg-white rounded-lg shadow-md overflow-hidden flex'}>
-        <img src={post.thumbnail} alt={post.title} class={$viewMode === 'grid' ? 'w-full h-48 object-cover' : 'w-1/3 h-48 object-cover'}>
-        <div class={$viewMode === 'grid' ? 'p-4' : 'p-4 w-2/3'}>
-          <h2 class="text-xl font-semibold mb-2">{post.title}</h2>
-          <p class="text-gray-600 mb-4">{post.content.substring(0, 100)}...</p>
-          <a href={`/blog/${post.id}`} class="text-blue-600 hover:underline">Read more</a>
-        </div>
-      </div>
-    {/each}
-  </div>
-</div>
+	{#if isLoading}
+		<p>Loading posts...</p>
+	{:else if error}
+		<p class="text-red-500">Error: {error}</p>
+	{:else if posts.length === 0}
+		<p>No posts found.</p>
+	{:else}
+		<div class={viewMode === 'grid' ? 'blog-post-list' : 'space-y-6'}>
+			{#each posts as post (post.id)}
+				<article class="blog-post-card" on:click={() => navigateToPost(post.id)}>
+					<img
+						src={post.thumbnail || '/placeholder.jpg'}
+						alt={post.title}
+						class="blog-post-card-image"
+					/>
+					<div class="content">
+						<h2 class="text-xl font-semibold mb-2">
+							{post.title}
+						</h2>
+						<p class="text-gray-600 mb-4">{post.content.substring(0, 100)}...</p>
+						<div class="flex justify-between items-center text-sm text-gray-500">
+							<span>By {post.authorId}</span>
+							<span>{new Date(post.createdAt).toLocaleDateString()}</span>
+						</div>
+					</div>
+				</article>
+			{/each}
+		</div>
+	{/if}
+</main>
