@@ -1,33 +1,52 @@
-<!-- src/routes/blog/[slug]/+page.svelte -->
-<script>
-    export let params;
-  
-    // 임시 데이터, 실제로는 API 호출을 통해 데이터를 가져옵니다.
-    let post = {
-      title: 'SvelteKit 시작하기',
-      author: '홍길동',
-      date: '2024-10-01',
-      content: `SvelteKit은 Svelte 프레임워크의 강력한 기능을 사용하여 쉽고 빠르게 웹 애플리케이션을 개발할 수 있도록 도와줍니다.
-  
-      이 가이드에서는 SvelteKit 프로젝트를 설정하고 기본적인 기능을 구현하는 방법을 배웁니다. 먼저 SvelteKit의 특징과 장점을 소개하고, 프로젝트 초기화부터 기본적인 페이지 라우팅, 상태 관리, 스타일링까지 설명합니다.
-  
-      SvelteKit은 빠르고 간편하며, SSR(Server-Side Rendering)과 CSR(Client-Side Rendering)을 모두 지원하는 최신 웹 프레임워크입니다. 이 글을 통해 SvelteKit을 사용하는 첫 단계를 시작해 보세요.`
-    };
-  </script>
-  
-  <main class="container mx-auto px-4 mt-4">
-    <h1 class="text-4xl font-bold text-[#ff6f61] mb-4">{post.title}</h1>
-    <p class="text-sm text-gray-400 mb-6">{post.author} &middot; {post.date}</p>
-    <div class="prose prose-invert text-gray-300">
-      {@html post.content}
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { auth } from '$lib/stores/auth';
+  import { goto } from '$app/navigation';
+  import { api } from '$lib/utils/api';
+  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+
+  let post: any = null;
+  let isAuthor = false;
+
+  onMount(async () => {
+    const slug = $page.params.slug;
+    try {
+      post = await api.getBlogPost(slug);
+      isAuthor = $auth.isAuthenticated && $auth.user?.id === post.authorId;
+    } catch (error) {
+      console.error('Failed to fetch blog post:', error);
+    }
+  });
+
+  function editPost() {
+    goto(`/blog/${post.id}/edit`);
+  }
+</script>
+
+<svelte:head>
+  {#if post}
+    <title>{post.title} - DevCommunity Blog</title>
+  {/if}
+</svelte:head>
+
+{#if post}
+  <article class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-4">{post.title}</h1>
+    <div class="mb-8">
+      <img src={post.thumbnail} alt={post.title} class="w-full h-64 object-cover rounded-lg">
     </div>
-  </main>
-  
-  <style>
-    main {
-      min-height: calc(100vh - 8rem); /* Adjust for Navbar and Footer height */
-    }
-    .prose {
-      max-width: 100%;
-    }
-  </style>
+    <MarkdownRenderer content={post.content} />
+    {#if isAuthor}
+      <div class="mt-8">
+        <button on:click={editPost} class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          Edit Post
+        </button>
+      </div>
+    {/if}
+  </article>
+{:else}
+  <div class="container mx-auto px-4 py-8">
+    <p>Loading...</p>
+  </div>
+{/if}
