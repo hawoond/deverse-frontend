@@ -4,7 +4,7 @@ import { auth } from '$lib/stores/auth';
 import sampleData from '$lib/sampleData.json';
 import instance from '$lib/axios';
 
-const API_BASE_URL = 'http://localhost:8602'; // 실제 API URL로 변경해야 합니다.
+const baseURL = import.meta.env.VITE_API_BASE_URL; // 실제 API URL로 변경해야 합니다.
 
 interface BlogPost {
   id: string;
@@ -47,42 +47,48 @@ interface User {
 }
 
 export interface Board {
-  id: string;
+  id: number;
   name: string;
   description: string;
-  postCount: number;
+  post_count: number;
+  created_at: string;
 }
 
 export interface BoardPost {
-  id: string;
+  id: number;
+  parent_id: number | null;
   title: string;
+  content: string;
   author: string;
-  createdAt: string;
+  board_name: string;
+  category_name?: string;
   commentCount: number;
+  createdAt: string;
 }
-
 
 export async function http<T>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-  url: string,
+  endpoint: string,
   body?: Record<string, unknown> | FormData,
   customHeaders?: Record<string, string>
 ): Promise<T> {
+  console.log(baseURL)
+  const url = `${baseURL}${endpoint}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...customHeaders,
   };
 
-  // FormData일 경우 Content-Type 자동 설정 방지
-  if (body instanceof FormData) {
+  if (body instanceof FormData || body == undefined) {
     delete headers['Content-Type'];
   }
 
   try {
+    const reqBody = body ? body instanceof FormData ? body : JSON.stringify(body):undefined;
     const response = await fetch(url, {
       method,
       headers,
-      body: body && !(body instanceof FormData) ? JSON.stringify(body) : (body as BodyInit),
+      body: reqBody,
     });
 
     if (!response.ok) {
@@ -90,7 +96,6 @@ export async function http<T>(
       throw new Error(error.message || 'Something went wrong');
     }
 
-    // Response 자동 JSON 파싱
     return (await response.json()) as T;
   } catch (error: unknown) {
     throw error instanceof Error ? error : new Error('Unexpected error');
@@ -110,17 +115,17 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
     switch (options.method){
       case "POST":{
         
-        response = await instance.post(`${API_BASE_URL}${url}`,
+        response = await instance.post(`${baseURL}${url}`,
           options,
         );
         break;
       }
       case "DELETE":{
-        response = await instance.get(`${API_BASE_URL}${url}`);
+        response = await instance.get(`${baseURL}${url}`);
         break;
       }
       case "PUT":{
-        response = await instance.get(`${API_BASE_URL}${url}`);
+        response = await instance.get(`${baseURL}${url}`);
         break;
       }
       default:{
@@ -278,46 +283,43 @@ export async function createCommunityPost(id: string, title: string, content: st
 
 export async function getBoards(): Promise<Board[]> {
   
-    const data = await http<{ boards: Board[] }>('GET', 'http://localhost:8602/boards');
-    console.log(data.boards);
+    const data: Board[] = await http('GET', '/boards');
+    console.log(data);
   
-
-
-  // const response = await fetchWithAuth(`/boards`,
-  //   { method: 'GET' }
-  // );
-  // const data = await response.json();
-
-  return (data.boards || [
+  return (data || [
     {
         id: "0",
         name: "나는",
         description: "안녕안녕",
-        postCount: "0"
+        post_count: "0"
       
     },
     {
       id: "1",
       name: "안녕",
       description: "디지몬",
-      postCount: "1000"
+      post_count: "1000"
     
   }
   ]); 
 } 
 
 export async function getBoard(boardId: string): Promise<Board> {
-  const response = await fetchWithAuth(`/boards/${boardId}`);
+  const response = await fetchWithAuth(`/posts/${boardId}`);
   const data = await response.json();
 
   return (data.boards || []); 
 } 
 
 export async function getBoardPosts(boardId: string): Promise<BoardPost[]> {
-  const response = await fetchWithAuth(`/boards/${boardId}/posts`)
-  const data = await response.json();
+  const response = await fetchWithAuth(`/posts/${boardId}`) ;
+  
+  if (!response.ok) {
+    return []
+  }
+  const data: BoardPost[] = await response.json();
 
-  return (data.posts || []); 
+  return (data || []); 
 }
 
 export const api = {
@@ -332,5 +334,5 @@ export const api = {
   createCommunityPost,
   getBoards,
   getBoard,
-  getBoardPosts
+  getBoardPosts,
 };

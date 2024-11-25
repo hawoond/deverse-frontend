@@ -41,10 +41,10 @@
   {:else}
     <ul class="board-list">
       {#each boards as board (board.id)}
-        <button class="board-item" on:click={() => handleBoardClick(board.id)} on:keydown={(e) => e.key === 'Enter' && handleBoardClick(board.id)}>
+        <button class="board-item" on:click={() => handleBoardClick(String(board.id))} on:keydown={(e) => e.key === 'Enter' && handleBoardClick(String(board.id))}>
           <h2>{board.name}</h2>
           <p>{board.description}</p>
-          <span class="post-count">게시글 수: {board.postCount}</span>
+          <span class="post-count">게시글 수: {board.post_count}</span>
         </button>
       {/each}
     </ul>
