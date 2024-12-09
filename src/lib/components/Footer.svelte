@@ -20,11 +20,10 @@
 			<div>
 				<h3>Contact</h3>
 				<p>Email: hawoond@gmail.com</p>
-				<p>Phone: +82 (010) 1234-7890</p>
 			</div>
 		</div>
 		<div class="footer-copyright">
-			<p>&copy; 2023 Deverse. All rights reserved.</p>
+			<p>&copy; 2024 SORTIE. All rights reserved.</p>
 		</div>
 	</div>
 </footer>

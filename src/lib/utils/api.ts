@@ -62,8 +62,8 @@ export interface BoardPost {
   author: string;
   board_name: string;
   category_name?: string;
-  commentCount: number;
-  createdAt: string;
+  comment_count: number;
+  created_at: string;
 }
 
 export async function http<T>(
@@ -283,8 +283,8 @@ export async function createCommunityPost(id: string, title: string, content: st
 
 export async function getBoards(): Promise<Board[]> {
   
-    const data: Board[] = await http('GET', '/boards');
-    console.log(data);
+  const data: Board[] = await http('GET', '/boards');
+  console.log(data);
   
   return (data || [
     {
@@ -312,14 +312,26 @@ export async function getBoard(boardId: string): Promise<Board> {
 } 
 
 export async function getBoardPosts(boardId: string): Promise<BoardPost[]> {
-  const response = await fetchWithAuth(`/posts/${boardId}`) ;
+  const data: BoardPost[] = await http<BoardPost[]>('GET', `/posts/${boardId}`);
   
-  if (!response.ok) {
-    return []
-  }
-  const data: BoardPost[] = await response.json();
 
   return (data || []); 
+}
+
+export async function createPost(boardId: number, title: string, content: string) {
+  await http('POST',
+     '/posts',
+     { 
+      "board_id": boardId, 
+      "title": title,
+      "content": content,
+      "author": "test"
+    }
+  )
+
+  
+
+  return;
 }
 
 export const api = {
@@ -335,4 +347,5 @@ export const api = {
   getBoards,
   getBoard,
   getBoardPosts,
+  createPost,
 };
