@@ -4,7 +4,7 @@
 	import { fetchBlogPosts, getCurrentUser } from '$lib/utils/api';
 	import { auth } from '$lib/stores/auth';
 	import type { BlogPost, User } from '$lib/types';
-  import '$styles/blog.css';
+	import '$styles/blog.css';
 
 	let posts: BlogPost[] = [];
 	let currentUser: User | null = null;
@@ -51,9 +51,9 @@
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">
-	<div class="flex justify-between items-center mb-8">
+	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-4xl font-bold">Deverse Blog</h1>
-		<div class="space-x-4">
+		<div class="flex gap-4">
 			<button on:click={toggleViewMode} class="btn">
 				Switch to {viewMode === 'grid' ? 'List' : 'Grid'} View
 			</button>
@@ -70,8 +70,10 @@
 	{:else if posts.length === 0}
 		<p>No posts found.</p>
 	{:else}
-		<div class={viewMode === 'grid' ? 'blog-post-list' : 'space-y-6'}>
+		<div class={viewMode === 'grid' ? 'blog-post-list-grid' : 'blog-post-list'}>
 			{#each posts as post (post.id)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 				<article class="blog-post-card" on:click={() => navigateToPost(post.id)}>
 					<img
 						src={post.thumbnail || '/placeholder.jpg'}
@@ -79,11 +81,9 @@
 						class="blog-post-card-image"
 					/>
 					<div class="content">
-						<h2 class="text-xl font-semibold mb-2">
-							{post.title}
-						</h2>
-						<p class="text-gray-600 mb-4">{post.content.substring(0, 100)}...</p>
-						<div class="flex justify-between items-center text-sm text-gray-500">
+						<h2>{post.title}</h2>
+						<p>{post.content.substring(0, 100)}...</p>
+						<div class="blog-post-meta">
 							<span>By {post.authorId}</span>
 							<span>{new Date(post.createdAt).toLocaleDateString()}</span>
 						</div>

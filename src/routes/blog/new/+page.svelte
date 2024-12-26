@@ -4,6 +4,7 @@
 	import type { BlogPost } from '$lib/types';
 	import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
 	import HTMLEditor from '$lib/components/HTMLEditor.svelte';
+	import '$styles/editor.css';
 
 	let title = '';
 	let content = '';
@@ -40,44 +41,59 @@
 	<title>Create New Blog Post - Deverse</title>
 </svelte:head>
 
-<main class="container mx-auto px-4 py-8">
-	<h1 class="text-3xl font-bold mb-8">Create New Blog Post</h1>
+<main class="editor-main">
+	<div class="editor-header">
+		<h1>Create New Blog Post</h1>
+		<button on:click={() => goto('/blog')} class="btn-secondary">Back to Blog</button>
+	</div>
 
-	<form on:submit|preventDefault={handleSubmit} class="space-y-6">
+	<form on:submit|preventDefault={handleSubmit} class="editor-form">
 		<div class="form-group">
-			<label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-			<input type="text" id="title" bind:value={title} required class="form-control" />
+			<label for="title">Title</label>
+			<input type="text" id="title" bind:value={title} required />
 		</div>
 
 		<div class="form-group">
-			<label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail</label>
-			<input
-				type="file"
-				id="thumbnail"
-				accept="image/*"
-				on:change={handleThumbnailChange}
-				class="form-control"
-			/>
+			<label for="thumbnail">Thumbnail</label>
+			<input type="file" id="thumbnail" accept="image/*" on:change={handleThumbnailChange} />
 		</div>
 
 		<div class="form-group">
-			<div class="flex justify-between mb-2">
-				<button type="button" on:click={toggleEditorMode} class="btn">
-					Switch to {editorMode === 'markdown' ? 'HTML' : 'Markdown'} Editor
-				</button>
+			<div class="editor-mode-switch">
+				<label>Content</label>
+				<div class="toggle-container">
+					<div class="toggle-switch">
+						<input
+							type="checkbox"
+							id="editor-toggle"
+							class="toggle-switch-checkbox"
+							checked={editorMode === 'html'}
+							on:change={toggleEditorMode}
+						/>
+						<label class="toggle-switch-label" for="editor-toggle">
+							<span class="toggle-switch-inner"></span>
+							<span class="toggle-switch-switch"></span>
+						</label>
+					</div>
+					<span class="toggle-label">{editorMode === 'markdown' ? 'Markdown' : 'HTML'}</span>
+				</div>
 			</div>
 
-			{#if editorMode === 'markdown'}
-				<MarkdownEditor bind:value={content} />
-			{:else}
-				<HTMLEditor bind:value={content} />
-			{/if}
+			<div class="editor-container">
+				{#if editorMode === 'markdown'}
+					<MarkdownEditor bind:value={content} />
+				{:else}
+					<HTMLEditor bind:value={content} />
+				{/if}
+			</div>
 		</div>
 
 		{#if error}
-			<p class="text-red-500">{error}</p>
+			<p class="error-message">{error}</p>
 		{/if}
 
-		<button type="submit" class="btn"> Create Post </button>
+		<div class="form-actions">
+			<button type="submit" class="btn-primary">Create Post</button>
+		</div>
 	</form>
 </main>
